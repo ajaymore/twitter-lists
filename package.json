@@ -1,0 +1,38 @@
+{
+  "name": "twitter-lists",
+  "version": "0.1.0",
+  "description": "Using twitter api to keep track of tweets of specific people",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajaymore/twitter-lists.git"
+  },
+  "keywords": [
+    "node-twitter",
+    "graphql",
+    "firebase",
+    "expressjs"
+  ],
+  "author": "Ajay More <ajmore.biz@gmail.com> (https://ajaymore.github.io)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ajaymore/twitter-lists/issues"
+  },
+  "homepage": "https://github.com/ajaymore/twitter-lists#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "express-graphql": "^0.6.4",
+    "firebase": "^3.9.0",
+    "firebase-admin": "^4.2.1",
+    "graphql": "^0.9.5",
+    "twitter": "^1.7.0"
+  },
+  "devDependencies": {
+    "babel-register": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1"
+  }
+}
