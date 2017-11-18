@@ -10,15 +10,30 @@ services:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
-
+    networks:
+      - back
+      
   wordpress:
     depends_on:
       - db
     image: wordpress
-    ports:
-      - "8000:80"
     restart: always
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
+    networks:
+      - reverse-proxy
+      - back
+    environment:
+      - VIRTUAL_PORT=8000
+      - VIRTUAL_HOST=nahiyetpan.ga
+      - LETSENCRYPT_HOST=nahiyetpan.ga
+      - LETSENCRYPT_EMAIL=ajay@nahiyetpan.ga
+      
+networks:
+  reverse-proxy:
+    external:
+      name: reverse-proxy
+  back:
+    driver: bridge
