@@ -25,9 +25,9 @@ services:
             - moodleapp-data:/var/moodledata
         env_file:
             - moodle_variables.env
-	    networks:
-	      - reverse-proxy
-	      - back
+        networks:
+	    - reverse-proxy
+	    - back
         deploy:
             replicas: 1
             restart_policy:
