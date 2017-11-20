@@ -1,99 +1,42 @@
-version: '2'
+version: '3'
+
 services:
-  mail:
-    build: mail
-    env_file:
-      - settings.env
-    links:
-      - mysql
-      - opendkim
-      - spamassassin
-    volumes:
-      - "./data/certs:/etc/certs"
-    volumes_from:
-      - storagebackup
-    ports:
-      - "25:25"
-      - "587:587"
-      - "993:993"
-    networks:
-      - reverse-proxy
-      - back
+    dbapp:
+        image: mysql:latest
+        restart: always
+        volumes:
+            - db-volume:/var/lib/mysql
+        env_file:
+            - moodle_variables.env
+        networks:
+            - back
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: any
+    moodleapp:
+        image: jhardison/moodle:latest
+        links:
+            - dbapp:DB
+        depends_on: 
+            - dbapp
+        restart: always
+        volumes:
+            - moodleapp-data:/var/moodledata
+        env_file:
+            - moodle_variables.env
+	    networks:
+	      - reverse-proxy
+	      - back
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: any            
 
-  opendkim:
-    build: opendkim
-    env_file:
-      - settings.env
-    expose:
-      - "8891"
-    volumes:
-      - "./data/certs:/etc/certs"
-    networks:
-      - reverse-proxy
-      - back
+volumes: 
+    db-volume:
+    moodleapp-data:
 
-  # If you only want the mail server and no webmail/admin simply remove webserver and memcache
-  webserver:
-    build: webserver
-    env_file:
-      - settings.env
-    ports:
-      - "80:80"
-    volumes:
-      - "./data/certs:/etc/certs"
-    volumes_from:
-      - storagebackup
-    links:
-      - mysql
-      - memcache
-      - mail
-    networks:
-      - reverse-proxy
-      - back
-
-  spamassassin:
-    build: spamassassin
-    expose:
-      - "783"
-    volumes_from:
-      - storagebackup
-    networks:
-      - reverse-proxy
-      - back
-
-  memcache:
-    build: memcache
-    expose:
-      - "11211"
-    networks:
-      - reverse-proxy
-      - back
-
-  mysql:
-    build: mysql
-    environment:
-      - "MYSQL_ROOT_PASSWORD=password"
-    env_file:
-      - settings.env
-    volumes:
-      - "./data/backup:/backup"
-    expose:
-      - "3306"
-    networks:
-      - back
-
-  # Storage container for vmail that also creates daily backups
-  storagebackup:
-    build: storagebackup
-    env_file:
-      - settings.env
-    links:
-      - mysql
-    volumes:
-      - "/var/vmail"
-      - "./data/backup:/backup"
-      - "/var/spamassassin"
-      
 networks:
   reverse-proxy:
     external:
