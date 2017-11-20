@@ -1,35 +1,98 @@
-version: '3.1'
+version: '2'
 services:
-  db:
-    image: mariadb:10.2.10
+  mail:
+    build: mail
+    env_file:
+      - settings.env
+    links:
+      - mysql
+      - opendkim
+      - spamassassin
     volumes:
-      - /home/am/maria_db_data:/var/lib/mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: somewordpress
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
-    networks:
-      - back
-      
-  wordpress:
-    depends_on:
-      - db
-    image: wordpress
-    restart: always
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
+      - "./data/certs:/etc/certs"
+    volumes_from:
+      - storagebackup
+    ports:
+      - "25:25"
+      - "587:587"
+      - "993:993"
     networks:
       - reverse-proxy
       - back
+
+  opendkim:
+    build: opendkim
+    env_file:
+      - settings.env
+    expose:
+      - "8891"
+    volumes:
+      - "./data/certs:/etc/certs"
+    networks:
+      - reverse-proxy
+      - back
+
+  # If you only want the mail server and no webmail/admin simply remove webserver and memcache
+  webserver:
+    build: webserver
+    env_file:
+      - settings.env
+    ports:
+      - "80:80"
+    volumes:
+      - "./data/certs:/etc/certs"
+    volumes_from:
+      - storagebackup
+    links:
+      - mysql
+      - memcache
+      - mail
+    networks:
+      - reverse-proxy
+      - back
+
+  spamassassin:
+    build: spamassassin
+    expose:
+      - "783"
+    volumes_from:
+      - storagebackup
+    networks:
+      - reverse-proxy
+      - back
+
+  memcache:
+    build: memcache
+    expose:
+      - "11211"
+    networks:
+      - reverse-proxy
+      - back
+
+  mysql:
+    build: mysql
     environment:
-      - VIRTUAL_PORT=8000
-      - VIRTUAL_HOST=nahiyetpan.ga
-      - LETSENCRYPT_HOST=nahiyetpan.ga
-      - LETSENCRYPT_EMAIL=ajay@nahiyetpan.ga
+      - "MYSQL_ROOT_PASSWORD=password"
+    env_file:
+      - settings.env
+    volumes:
+      - "./data/backup:/backup"
+    expose:
+      - "3306"
+    networks:
+      - back
+
+  # Storage container for vmail that also creates daily backups
+  storagebackup:
+    build: storagebackup
+    env_file:
+      - settings.env
+    links:
+      - mysql
+    volumes:
+      - "/var/vmail"
+      - "./data/backup:/backup"
+      - "/var/spamassassin"
       
 networks:
   reverse-proxy:
