@@ -1,45 +1,45 @@
 version: '3'
 
 services:
-    dbapp:
-        image: mysql:latest
-        restart: always
-        volumes:
-            - db-volume:/var/lib/mysql
-        env_file:
-            - moodle_variables.env
-        networks:
-            - back
-        deploy:
-            replicas: 1
-            restart_policy:
-                condition: any
-    moodleapp:
-        image: jhardison/moodle:latest
-        links:
-            - dbapp:DB
-        depends_on: 
-            - dbapp
-        restart: always
-        volumes:
-            - moodleapp-data:/var/moodledata
-        env_file:
-            - moodle_variables.env
-        networks:
-	          - reverse-proxy
-	          - back
-        deploy:
-            replicas: 1
-            restart_policy:
-                condition: any            
+  dbapp:
+    image: mysql:latest
+    restart: always
+    volumes:
+      - db-volume:/var/lib/mysql
+    env_file:
+      - moodle_variables.env
+    networks:
+      - back
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+  moodleapp:
+    image: jhardison/moodle:latest
+    links:
+      - dbapp:DB
+    depends_on: 
+      - dbapp
+    restart: always
+    networks:
+      - reverse-proxy
+      - back
+    volumes:
+      - moodleapp-data:/var/moodledata
+    env_file:
+      - moodle_variables.env
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any            
 
 volumes: 
-    db-volume:
-    moodleapp-data:
+  db-volume:
+  moodleapp-data:
 
 networks:
-    reverse-proxy:
-        external:
-            name: reverse-proxy
-    back:
-driver: bridge
+  reverse-proxy:
+    external:
+      name: reverse-proxy
+  back:
+    driver: bridge
