@@ -26,8 +26,8 @@ services:
         env_file:
             - moodle_variables.env
         networks:
-	    - reverse-proxy
-	    - back
+	          - reverse-proxy
+	          - back
         deploy:
             replicas: 1
             restart_policy:
@@ -42,4 +42,4 @@ networks:
         external:
             name: reverse-proxy
     back:
-        driver: bridge
+driver: bridge
