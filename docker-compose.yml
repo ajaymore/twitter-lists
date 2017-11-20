@@ -38,8 +38,8 @@ volumes:
     moodleapp-data:
 
 networks:
-  reverse-proxy:
-    external:
-      name: reverse-proxy
-  back:
-    driver: bridge
+    reverse-proxy:
+        external:
+            name: reverse-proxy
+    back:
+        driver: bridge
